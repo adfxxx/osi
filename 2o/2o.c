@@ -43,7 +43,7 @@ int main(){
     loggin(&users, &count, &now_login);
     int function = 0;
     while (function != 6){
-        printf("\nFunctions:\n 1. Time\n 2. Date\n 3. How much <time> flag\n 4. Logout\n 5. Sanctions username <number>\n 6. Exit\nInput a number: ");
+        printf("\t\nMain menu\n 1. Time\n 2. Date\n 3. How much <time> flag\n 4. Logout\n 5. Sanctions username <number>\n 6. Exit\nChoose and enter a number, please: ");
         scanf("%d", &function);
         if (function == 1){
             int index = find_index(now_login, users, count);
@@ -82,19 +82,19 @@ int main(){
             if(index != -1){
                 if(users[index].sanct == 0 || users[index].sanct > users[index].count_functions){
                     users[index].count_functions++;
-                    printf("Input a date (day month year) and a flag(-s, -m, -h, -y) ");
+                    printf("Enter date and time (day.month.year hour:minutes:seconds) and a flag(-s [seconds], -m [minutes], -h [hours], -y [years]): ");
                     struct tm input;
                     int result = 0; 
                     char flag[3];
                     do{
                         result = scanf("%d.%d.%d %d:%d:%d %s", &input.tm_mday, &input.tm_mon, &input.tm_year, &input.tm_hour, &input.tm_min, &input.tm_sec, flag);
                         if(result != 7 || check_date_time(input) == fail){
-                            printf("Wrong date, try again: ");
+                            printf("Wrong date or time, try again: ");
                             while (getchar() != '\n');
                         }
                     }while(result != 7 || check_date_time(input) == fail);
-                    while(!check_flag(flag)){
-                        printf("Wrong flag");
+                    while(check_flag(flag) == fail){
+                        printf("Wrong flag, try again: ");
                         scanf("%s", flag);
                     }
                     if (!strcmp(flag,"-s")){
@@ -146,7 +146,7 @@ int main(){
             if(index != -1){
                 if(users[index].sanct == 0 || users[index].sanct > users[index].count_functions){
                     users[index].count_functions++;
-                    if(sanctions(&users, count)){
+                    if(sanctions(&users, count) == success){
                         printf("\nSuccess!");
                         continue;
                     }
@@ -179,20 +179,20 @@ int check_login(char *str, int length){
 }
 
 void get_login(user **users, int *count){
-    printf("\nInput login (it should have <=6 symbols, digits or symbols of alphabet): ");
+    printf("\nEnter login (your login must be no more than 6 symbols and contain digits or Latin alphabet symbols): ");
     char str[256];    
     scanf("%s", str);
     int length = strlen(str);
     if (length > 6 || length < 1){
         while(length < 1 || length > 6){
-            printf("\nLogin should have <=6 symbols, try again: ");
+            printf("Your login must be no more than 6 symbols, try again: ");
             scanf("%s", str);
             length = strlen(str);
         }
     }
-    if(!check_login(str, length)){
+    if(check_login(str, length) == fail){
         printf("Wrong symbol in login, try again: ");
-        while(!check_login(str, length)){
+        while(check_login(str, length) == fail){
             scanf("%s", str);
             length = strlen(str);
         }
@@ -200,7 +200,7 @@ void get_login(user **users, int *count){
     *users = realloc(*users, (*count + 1)*sizeof(user));
     (*users)[*count].sanct = 0;
     strcpy((*users)[*count].login,str);
-    printf("\nGood login!");
+    printf("Good login!");
     (*count)++;
 }
 
@@ -214,7 +214,7 @@ int check_pin(char *input, int length){
 }
 
 void get_pin(user *users, int count){
-    printf("\nNow input your pin-code (0 <= number <= 100000): ");
+    printf("\nNow enter your pin-code (your pin-code must be a number between 0 and 100000): ");
     int pin = 0;
     int flag = 0;
     char input [256];
@@ -223,12 +223,12 @@ void get_pin(user *users, int count){
         scanf("%s", input);
         length = strlen(input);
         if (length == 0 || length > 6){
-            printf("\nPin-code should be a number between 0 and 100000, try again: ");
+            printf("Your pin-code must be a number between 0 and 100000, try again: ");
             flag = 0;
             continue;
         }
-        if(!check_pin(input, length)){
-            printf("\nPin-code should be a number between 0 and 100000, try again: ");
+        if(check_pin(input, length) == fail){
+            printf("Your pin-code must be a number between 0 and 100000, try again: ");
             flag = 0;
             continue;
         }
@@ -236,7 +236,7 @@ void get_pin(user *users, int count){
     }
     pin = atoi(input);
     users[count - 1].pin_code = pin;
-    printf("\nGood pin-code!");
+    printf("Good pin-code!");
 }
 
 int check_flag(char *flag){
@@ -252,18 +252,18 @@ int check_flag(char *flag){
 void loggin(user **users, int *count, char **now_login){
     char state;
     if(*count == 0){
-        printf("Choose right option:\n \t1. Sign in\n \t2. Log in\nInput a number (1 or 2): ");
+        printf("Choose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
         scanf(" %c", &state);
         getchar();
         while (state != '1'){
-            printf ("\nWrong input. This is your first session, so you have to sign in (input 1)");
-            printf("\nChoose right option:\n \t1. Sign in\n \t2. Log in\nInput a number (1 or 2): "); 
+            printf ("\nWrong input. This is your first session, so you have to create a new account (input 1)");
+            printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): "); 
             scanf(" %c", &state);
         }
         get_login(users, count);
         get_pin(*users, *count);
     }
-    printf("\nChoose right option:\n \t1. Sign in\n \t2. Log in\nInput a number (1 or 2): ");
+    printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
     scanf(" %c", &state);
     while (state != '1' && state != '2'){
         printf ("Wrong input. Your input should be 1 or 2, try again: ");
@@ -273,7 +273,7 @@ void loggin(user **users, int *count, char **now_login){
         if (state == '1'){
             get_login(users, count);
             get_pin(*users, *count);  
-            printf("\nChoose right option:\n \t1. Sign in\n \t2. Log in\nInput a number (1 or 2): ");
+            printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
             scanf(" %c", &state);
             while (state != '1' && state != '2'){
                 printf ("Wrong input. Your input should be 1 or 2, try again: ");
@@ -281,23 +281,23 @@ void loggin(user **users, int *count, char **now_login){
             }
         }
         if(state == '2'){
-            printf ("Input your login and your pin-code: ");
+            printf ("Enter your login and pin-code: ");
             char name[256];
             int pin;
             scanf("%s", name);
             getchar();
             scanf("%d", &pin);
             if(search(name, pin, *users, *count) == fail){
-                printf("\nYour login or pin-code is not in the system. Try again or sign in");
-                printf("\nChoose right option:\n \t1. Sign in\n \t2. Log in\nInput a number (1 or 2): ");
+                printf("\nYour login or pin-code is not in the system. Try again or sign up.");
+                printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
                 scanf(" %c", &state);
                 while (state != '1' && state != '2'){
-                    printf ("Wrong input. Your input should be 1 or 2");
+                    printf ("Wrong input. Your input should be 1 or 2.");
                     scanf(" %c", &state);
                 }
             }
             else{
-                printf("\nSuccess! Now you have an access to functions.");
+                printf("\nSuccess! Now you have an access to the main menu.");
                 *now_login = malloc(strlen(name)+1);
                 strcpy(*now_login, name);
                 break;
@@ -338,7 +338,7 @@ int now_time(){
     time_t now_time = time(NULL);
     struct tm *now = localtime(&now_time);
     printf("Time: %d:%d:%d\n", now->tm_hour, now->tm_min, now->tm_sec);
-    printf("You want to get back to menu? Choose a variant:\n 1. Back to menu\n 2. Finish program\nInput a number: ");
+    printf("You want to get back to the main menu? Choose an option:\n 1. Back to menu\n 2. Finish program\nEnter a number: ");
     int function = 0;
     scanf("%d", &function);
     if (function == 1){
@@ -365,7 +365,7 @@ int now_date(){
     time_t now_time = time(NULL);
     struct tm *now = localtime(&now_time);  
     printf("Date: %d.%d.%d\n", now->tm_mday, now->tm_mon + 1, now->tm_year+1900);
-    printf("You want to get back to menu? Choose a variant:\n 1. Back to menu\n 2. Finish program\nInput a number: ");
+    printf("You want to get back to the main menu? Choose an option:\n 1. Back to menu\n 2. Finish program\nEnter a number: ");
     int function = 0;
     scanf("%d", &function);
     if (function == 1){
@@ -391,7 +391,7 @@ int now_date(){
 int how_much_sec(struct tm input){
     time_t now_time = time(NULL);
     printf("Difference in seconds: %.lf\n", difftime(now_time, mktime(&input)));
-    printf("You want to get back to menu? Choose a variant:\n 1. Back to menu\n 2. Finish program\nInput a number: ");
+    printf("You want to get back to the main menu? Choose an option:\n 1. Back to menu\n 2. Finish program\nEnter a number: ");
     int function = 0;
     scanf("%d", &function);
     if (function == 1){
@@ -417,7 +417,7 @@ int how_much_sec(struct tm input){
 int how_much_min(struct tm input){
     time_t now_time = time(NULL);
     printf("Difference in minutes: %.lf\n", difftime(now_time, mktime(&input))/60);
-    printf("You want to get back to menu? Choose a variant:\n 1. Back to menu\n 2. Finish program\nInput a number: ");
+    printf("You want to get back to the main menu? Choose an option:\n 1. Back to menu\n 2. Finish program\nEnter a number: ");
     int function = 0;
     scanf("%d", &function);
     if (function == 1){
@@ -443,7 +443,7 @@ int how_much_min(struct tm input){
 int how_much_hours(struct tm input){
     time_t now_time = time(NULL);
     printf("Difference in hours: %.lf\n", difftime(now_time, mktime(&input))/3600);
-    printf("You want to get back to menu? Choose a variant:\n 1. Back to menu\n 2. Finish program\nInput a number: ");
+    printf("You want to get back to the main menu? Choose an option:\n 1. Back to menu\n 2. Finish program\nEnter a number: ");
     int function = 0;
     scanf("%d", &function);
     if (function == 1){
@@ -475,7 +475,7 @@ int how_much_years(struct tm input){
     else{
         printf("Difference in years: %d\n", input.tm_year - now->tm_year);
     }
-    printf("You want to get back to menu? Choose a variant:\n 1. Back to menu\n 2. Finish program\nInput a number: ");
+    printf("You want to get back to the main menu? Choose an option:\n 1. Back to menu\n 2. Finish program\nEnter a number: ");
     int function = 0;
     scanf("%d", &function);
     if (function == 1){
@@ -499,7 +499,7 @@ int how_much_years(struct tm input){
 }
 
 int sanctions(user **users, int count){
-    printf("Input user's login and number of functions for them: ");
+    printf("Enter user's login and number of available options for them: ");
     int number = 0 ;
     char name[256];
     int flag = 0;
@@ -507,7 +507,7 @@ int sanctions(user **users, int count){
         scanf("%s", name);
         int length = strlen(name);
         scanf("%d", &number);
-        if(!check_login(name, length) || number <= 0){
+        if(check_login(name, length) == fail || number <= 0){
             printf ("Wrong input, try again: ");
             continue;
         }
@@ -515,7 +515,7 @@ int sanctions(user **users, int count){
     }
     for (int i = 0; i <= count; i++){
         if (!strcmp(name, (*users)[i].login)){
-            printf("\nAre you sure? If yes, printf a password: ");
+            printf("\nAre you sure? If yes, enter a password: ");
             char password[5];
             scanf("%s", password);
             if(!strcmp(password, "12345")){
@@ -523,11 +523,10 @@ int sanctions(user **users, int count){
                 (*users)[i].count_functions = 0;
                 return success;
             }
-            else {printf("\nWrong password"); return fail;}
+            else {printf("\nWrong password."); return fail;}
         }
     }
-    printf("User is not in the system");
-    return fail;
+    printf("User is not found in the system.");
 }
 
 int find_index(char *name, user *users, int count){

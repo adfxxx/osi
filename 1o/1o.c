@@ -37,20 +37,12 @@ int main (int argc, char *argv[]){
         printf("File is not open");
         return not_open;
     }
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    unsigned char *buff = malloc(sizeof(unsigned char)*length);
-    fread(buff, sizeof(unsigned char), length, file);
-    fseek(file, 0, SEEK_SET);
-    for (int i = 0; i <= length; i++){
+    unsigned char buff;
+    while(fread(&buff, sizeof(unsigned char), 1, file)){
+        printf("%u ", buff);
         print(file);
-        fseek(file, 1, SEEK_CUR);
     }
-    
-    free(buff);
     fclose(file);
-    
     file = fopen(argv[1], "rb");
     fseek(file, 3, SEEK_SET);
     unsigned char buff2[4];
@@ -65,13 +57,10 @@ int main (int argc, char *argv[]){
 void print(FILE *file){
     char *base_ptr = file->_base;
     int length = strlen(base_ptr);
-    for (int i = 0; i < length; i++){
-        printf("%u, ", base_ptr[i]);
-    }
     printf("size of buff %d, ", file->_bufsiz);
     printf("charbuff %d, ", file->_charbuf);
     printf("cnt %d, ", file->_cnt);
     printf("descriptor %d, ", file->_file);
-    printf("flag %x, ", file->_flag);
-    printf("pointer %p\n", file->_ptr);
+    printf("flag %d, ", file->_flag);
+    printf("pointer %u\n", (*file->_ptr));
 }
