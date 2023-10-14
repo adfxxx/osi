@@ -19,9 +19,9 @@ enum flags{
 
 int check_flag(char *flag);
 int xor_8(FILE* file);
-int xor_32(FILE* file);
-int to_10_base(char **mask);
-int mask_hex(FILE* file, char *mask);
+int xor_32(FILE* file, unsigned char *result_4);
+int get_mask(char **mask);
+int mask_hex(FILE* file, int mask);
 
 int main(int argc, char *argv[]){
     if(argc != 3){
@@ -38,42 +38,41 @@ int main(int argc, char *argv[]){
 
     if(check_flag(argv[2]) == fail){
         printf("Flag is wrong");
+        fclose(file);
         return wrong_input;
     }
     int flag = check_flag(argv[2]);
     int result = 0;
+    unsigned char result_4[4] = {0};
+    int mask_hx = 0x37333732;
     switch(flag){
         case xor8:
             result = xor_8(file);
             if (result == fail){
                 printf("Error");
+                fclose(file);
                 return fail;
             }
             printf("Result of xor8: %d\n", result);
             fclose(file);
             return success;                   
         case xor32:
-            result = xor_32(file);
+            result = xor_32(file, result_4);
             if (result == fail){
                 printf("Error");
+                fclose(file);
                 return fail;
             }
-            printf("Result of xor32: %d\n", result);
+            printf("Result of xor32: ");
+            for (int i = 0; i < 4; i++){
+                printf("%u ", result_4[i]);
+            }
             fclose(file);
             return success;
         case mask:
-            printf("Input a mask: ");
-            char *mask = (char*)malloc(sizeof(char));
-            int length = to_10_base(&mask); 
-            if (length == fail || length == wrong_input){
-                fclose(file);
-                free(mask);
-                return fail;
-            }
-            result = mask_hex(file, mask);
+            result = mask_hex(file, mask_hx);
             printf("Result of mask <hex>: %d", result);
             fclose(file);
-            free(mask);
             return success;        
     }
 
@@ -99,7 +98,7 @@ int xor_8(FILE* file){
         if (ferror(file)){
             return fail;
         }
-        if (buff == ' '){
+        if (buff == 0){
             continue;
         }
         sum = sum ^ buff;
@@ -107,10 +106,8 @@ int xor_8(FILE* file){
     return sum;
 }
 
-int xor_32(FILE* file){
+int xor_32(FILE* file, unsigned char *result){
     unsigned char buff [4] = {0};
-    int sum = 0;
-    int result = 0;
     int i = 0;
     int count = 0;
     while(!feof(file)){
@@ -125,8 +122,9 @@ int xor_32(FILE* file){
             continue;
         }
         if (i == 3){
-            sum = buff[0] ^ buff[1] ^ buff[2] ^ buff[3];
-            result = result ^ sum;
+            for (int j = 0; j < 4; j++){
+                result[j] ^= buff[j];
+            }
             i = 0;
         }
         else {i++;}
@@ -134,69 +132,19 @@ int xor_32(FILE* file){
     for (int j = i; j < 4; j++){
         buff[j] = 0;
     }
-    sum = buff[0] ^ buff[1] ^ buff[2] ^ buff[3];
-    result = result ^ sum;
-    return result;
+    for (int j = 0; j < 4; j++){
+        result[j] ^= buff[j];
+    }
+    return success;
 }
 
-int to_10_base(char **mask){
-    int i = 0;
-    char symbol;
-    int count = 0;
-    while(scanf("%c", &symbol) && symbol != '\n'){
-        if(!isdigit(symbol) && !isalpha(symbol)){
-            printf("Wrong input");
-            return wrong_input;
-        }
-        (*mask)[count] = symbol;
-        count++;
-        (*mask) = (char*)realloc(*mask, sizeof(char)*count);
-        if(*mask == NULL){
-            printf("Error");
-            return fail;
-        }
-    }
-    
-    int length = strlen((*mask));
-    int temp = 0;
-    int number = 0;
-    for(int i = 0; i < length; ++i){
-        if(isdigit((*mask)[i])){
-            temp = (*mask)[i] - '0';
-            number += (temp*pow(16, length - i - 1));
-        }
-        else{
-            temp = tolower((*mask)[i]) - 'a' + 10;
-            number += (temp*pow(16, length - i - 1));
-        }
-    }
-    sprintf(*mask, "%d", number);
-    return length;
-}
-
-int mask_hex(FILE* file, char *mask){
+int mask_hex(FILE* file, int mask){
     unsigned char buff [4] = {0};
-    int size = 0;
     int count = 0;
-    int i = 0;
-    while(!feof(file)){
-        if (ferror(file)){
-            return fail;
+    while(fread(buff, sizeof(unsigned char), 4, file) == 4){
+        if(!memcmp(buff, &mask, 4)){
+            count++;
         }
-        size = fread(&buff[i], sizeof(unsigned char), 1, file);
-        if(size == 0){
-            break;
-        }
-        if (buff[i] == ' '){
-            continue;
-        }
-        if (i == 3){
-            if(buff[0] == mask[0] && buff[1] == mask[1] && buff[2] == mask[2] && buff[3] == mask[3]){
-                count++;
-            }
-            i = 0;
-        }
-        else {i++;}
     }
     return count;
 }

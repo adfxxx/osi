@@ -162,6 +162,8 @@ int main(){
             }
         }
     }
+    free(users);
+    free(now_login);
     return 0;
 }
 
