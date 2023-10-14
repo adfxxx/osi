@@ -19,10 +19,10 @@ typedef struct{
 } user;
 
 int check_login(char *str, int length);
-void get_login(user **users, int *count);
+int get_login(user **users, int *count);
 int check_pin(char *input, int length);
 void get_pin(user *users, int count);
-void loggin(user **users, int *count, char **now_login);
+int loggin(user **users, int *count, char **now_login);
 int search(char *name, int pin, user *users, int count);\
 int check_date_time(struct tm input);
 int now_time();
@@ -40,7 +40,10 @@ int main(){
     user *users = NULL;
     char *now_login = NULL;
     int count = 0;
-    loggin(&users, &count, &now_login);
+    if(loggin(&users, &count, &now_login) == fail){
+        printf("Something went wrong");
+        return fail;
+    }
     int function = 0;
     while (function != 6){
         printf("\t\nMain menu\n 1. Time\n 2. Date\n 3. How much <time> flag\n 4. Logout\n 5. Sanctions username <number>\n 6. Exit\nChoose and enter a number, please: ");
@@ -57,11 +60,15 @@ int main(){
                 }
                 else{ 
                     printf("Your limit is over. Good bye!");
-                    loggin(&users, &count, &now_login);
+                    if(loggin(&users, &count, &now_login) == fail){
+                        printf("Something went wrong");
+                        return fail;
+                    }
+                    continue;
                 }
             }
         }
-        if (function == 2){
+        else if (function == 2){
             int index = find_index(now_login, users, count);
             if(index != -1){
                 if(users[index].sanct == 0 || users[index].sanct > users[index].count_functions){
@@ -73,11 +80,15 @@ int main(){
                 }
                 else{ 
                     printf("Your limit is over. Good bye!");
-                    loggin(&users, &count, &now_login);
+                    if(loggin(&users, &count, &now_login) == fail){
+                        printf("Something went wrong");
+                        return fail;
+                    }
+                    continue;
                 }
             }
         }
-        if (function == 3){
+        else if (function == 3){
             int index = find_index(now_login, users, count);
             if(index != -1){
                 if(users[index].sanct == 0 || users[index].sanct > users[index].count_functions){
@@ -103,7 +114,8 @@ int main(){
                         if(how_much_sec(input)){
                             continue;
                         }
-                        else{break;}
+                        else{printf("\nSomething went wrong...");
+                        continue;}
                     }
                     if (!strcmp(flag,"-m")){
                         input.tm_year -= 1900;
@@ -111,7 +123,8 @@ int main(){
                         if(how_much_min(input)){
                             continue;
                         }
-                        else{break;}
+                        else{printf("\nSomething went wrong...");
+                        continue;}
                     }
                     if (!strcmp(flag,"-h")){
                         input.tm_year -= 1900;
@@ -119,7 +132,8 @@ int main(){
                         if(how_much_hours(input)){
                             continue;
                         }
-                        else{break;}
+                        else{printf("\nSomething went wrong...");
+                        continue;}
                     }
                     if (!strcmp(flag,"-y")){
                         input.tm_year -= 1900;
@@ -127,21 +141,30 @@ int main(){
                         if(how_much_years(input)){
                             continue;
                         }
-                        else{break;}
+                        else{printf("\nSomething went wrong...");
+                        continue;}
                     }
                 }
                 else{ 
                     printf("Your limit is over. Good bye!");
-                    loggin(&users, &count, &now_login);
+                    if(loggin(&users, &count, &now_login) == fail){
+                        printf("Something went wrong");
+                        return fail;
+                    }
+                    continue;
                 }
             }
         }
-        if (function == 4){
+        else if (function == 4){
             free(now_login);
             now_login = NULL;
-            loggin(&users, &count, &now_login);
+            if(loggin(&users, &count, &now_login) == fail){
+                printf("Something went wrong");
+                return fail;
+            }
+            continue;
         }
-        if (function == 5){
+        else if (function == 5){
             int index = find_index(now_login, users, count);
             if(index != -1){
                 if(users[index].sanct == 0 || users[index].sanct > users[index].count_functions){
@@ -157,14 +180,22 @@ int main(){
                 }
                 else{ 
                     printf("Your limit is over. Good bye!");
-                    loggin(&users, &count, &now_login);
+                    if(loggin(&users, &count, &now_login) == fail){
+                        printf("Something went wrong");
+                        return fail;
+                    }
+                     continue;
                 }
             }
         }
+        else if(function == 6){
+            printf("Good bye!");
+            free(users);
+            free(now_login);
+            return 0;
+        }
+        else {printf("Your input is wrong, try again\n");}
     }
-    free(users);
-    free(now_login);
-    return 0;
 }
 
 int check_login(char *str, int length){
@@ -180,7 +211,7 @@ int check_login(char *str, int length){
     return success;
 }
 
-void get_login(user **users, int *count){
+int get_login(user **users, int *count){
     printf("\nEnter login (your login must be no more than 6 symbols and contain digits or Latin alphabet symbols): ");
     char str[256];    
     scanf("%s", str);
@@ -200,6 +231,9 @@ void get_login(user **users, int *count){
         }
     }
     *users = realloc(*users, (*count + 1)*sizeof(user));
+    if(*users == NULL){
+        return fail;
+    }
     (*users)[*count].sanct = 0;
     strcpy((*users)[*count].login,str);
     printf("Good login!");
@@ -251,7 +285,7 @@ int check_flag(char *flag){
     else{return fail;}
 }
 
-void loggin(user **users, int *count, char **now_login){
+int loggin(user **users, int *count, char **now_login){
     char state;
     if(*count == 0){
         printf("Choose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
@@ -262,7 +296,9 @@ void loggin(user **users, int *count, char **now_login){
             printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): "); 
             scanf(" %c", &state);
         }
-        get_login(users, count);
+        if(get_login(users, count) == fail){
+            return fail;
+        }
         get_pin(*users, *count);
     }
     printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
@@ -273,7 +309,9 @@ void loggin(user **users, int *count, char **now_login){
     }
     while (state == '1' || state == '2'){
         if (state == '1'){
-            get_login(users, count);
+            if(get_login(users, count) == fail){
+                return fail;
+            }
             get_pin(*users, *count);  
             printf("\nChoose right option:\n \t1. Sign up\n \t2. Log in\nEnter a number (1 or 2): ");
             scanf(" %c", &state);
@@ -301,6 +339,9 @@ void loggin(user **users, int *count, char **now_login){
             else{
                 printf("\nSuccess! Now you have an access to the main menu.");
                 *now_login = malloc(strlen(name)+1);
+                if(*now_login == NULL){
+                    return fail;
+                }
                 strcpy(*now_login, name);
                 break;
             }
