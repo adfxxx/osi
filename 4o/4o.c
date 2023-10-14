@@ -20,7 +20,6 @@ enum flags{
 int check_flag(char *flag);
 int xor_8(FILE* file);
 int xor_32(FILE* file, unsigned char *result_4);
-int get_mask(char **mask);
 int mask_hex(FILE* file, int mask);
 
 int main(int argc, char *argv[]){
