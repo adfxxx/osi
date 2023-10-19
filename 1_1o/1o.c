@@ -46,6 +46,7 @@ int main (int argc, char *argv[]){
     file = fopen(argv[1], "rb");
     fseek(file, 3, SEEK_SET);
     unsigned char buff2[4];
+    printf("Buffer after moving: ");
     fread(buff2, sizeof(unsigned char), 4, file);
     for (int i = 0; i < 4; ++i){
         printf("%d ", buff2[i]);
