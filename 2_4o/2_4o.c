@@ -15,7 +15,7 @@ enum errors{
 };
 
 void print(int state);
-int search(char *name, char *line);
+int search(char *name, char *line, int *counter);
 
 int main(int argc, char *argv[]){
     if(argc != 2){
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
     }
     char *f_n = argv[1];
     FILE *file_names = fopen(f_n, "r");
-    if(file_names == NULL){
+    if(!file_names){
         print(is_not_open);
         return is_not_open;
     }
@@ -39,18 +39,17 @@ int main(int argc, char *argv[]){
     }
     int i = 0;
     int result = 0;
-    char *line = "abc";
+    char *line = "ab";
     char *temp_name;
     int flag = 0;
-    while((symbol = fgetc(file_names)) != EOF){
-        if(symbol != ' ' && symbol != '\t' && symbol != '\n'){
-            name[i] = symbol;
-            i++;
-        }
-        else{
+    int counter = 0;
+    pid_t pid;
+    while(symbol != EOF){
+        symbol = fgetc(file_names);
+        if(symbol == ' ' || symbol == '\t' || symbol == '\n' || symbol == EOF){
             name[i] = '\0';
             i = 0;
-            pid_t pid = fork();
+            pid = fork();
             if(pid == -1){
                 free(name);
                 fclose(file_names);
@@ -58,16 +57,14 @@ int main(int argc, char *argv[]){
                 return fork_error;
             }
             else if(pid == 0){
-                result = search(name, line);
+                result = search(name, line, &counter);
                 if(result == is_not_open){
                     printf("File %s is not open\n", name);
                 }
                 else if (result != fail){
-                    printf("Line is in string %d in %s\n", result, name);
-                    flag = 1;
+                    printf("Line is in %s\n", name);
                 }
-                free(name);
-                exit(EXIT_SUCCESS);
+                _Exit(counter);
             }
             else{
                 free(name);
@@ -91,20 +88,28 @@ int main(int argc, char *argv[]){
             }
             name = temp_name;
         }
+        if(symbol != ' ' && symbol != '\t' && symbol != '\n'){
+            name[i] = symbol;
+            i++;
+        }
     }
-    if(flag = 0){
-        printf("Line is not in files");
-    }
+    free(name);
     fclose(file_names);
     int status;
-    while(wait(&status) > 0){}
-
-    free(name);
-    
+    pid_t child_pid;
+    while ((child_pid = wait(&status)) > 0)
+    {
+        if (WIFEXITED(status)){
+            counter += WEXITSTATUS(status);
+        } 
+    }
+    if(counter == 0){
+        printf("Line is not in files\n");
+    }
     return success;
 }
 
-int search(char *name, char *line){
+int search(char *name, char *line, int *counter){
     FILE *file = fopen(name, "r");
     if(file == NULL){
         return is_not_open;
@@ -117,7 +122,8 @@ int search(char *name, char *line){
         if(strstr(str, line) != NULL){
             free(str);
             fclose(file);
-            return count;
+            *counter += 1;
+            return success;
         }
     }
     free(str);
@@ -127,12 +133,15 @@ int search(char *name, char *line){
 
 void print(int state){
     if(state == wrong_input){
-        printf("Input is wrong");
+        printf("Input is wrong\n");
     }
     else if(state == fork_error){
-        printf("Error with fork()");
+        printf("Error with fork()\n");
     }
     else if(state == memory_error){
-        printf("Memory error");
+        printf("Memory error\n");
+    }
+    else if(state == is_not_open){
+        printf("File is not open\n");
     }
 }
