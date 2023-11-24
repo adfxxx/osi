@@ -1,0 +1,4 @@
+prior=3 text="No..."
+prior=4 text="2,,,9\99\ ."
+prior=2 text="12,,,4 6"
+prior=5 text="qwe"
