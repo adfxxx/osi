@@ -54,16 +54,17 @@ void process_message(msg_buf msg, int msgid){
     int length = strlen(msg.mtext);
     char temp[MAX_TEXT];
     strcpy(temp, msg.mtext);
-    char prev;
+    char prev = '\0';
     char cur;
-    for(int i = 0; i < length; i++){
-        prev = cur;
+    for (int i = 0; i < length; i++) {
         cur = temp[i];
-        if(prev == cur && (cur == ' ' || cur == '\t' || cur == '\n' || cur == '!' || cur == '.' || cur == ',' || cur == '?')){
-            for(int j = i; j < length; j++){
-                temp[j] = temp[j+1];
+        if(prev == cur && (cur == ' ' || cur == '\t' || cur == '\n' || cur == '!' || cur == '.' || cur == ',' || cur == '?')) {
+            for(int j = i; j < length; j++) {
+                temp[j] = temp[j + 1];
             }
+            i--;
         }
+        prev = cur;
     }
     strcpy(msg.mtext, temp);
     msgsnd(msgid, &msg, sizeof(msg), IPC_NOWAIT);//отправка в очередь

@@ -31,20 +31,23 @@ int main(int argc, char *argv[]){
     
     char *line = NULL;
     size_t len = 0;
-    char str[MAX_TEXT];
     int count = 0;
     int prior = 0;
+    msg_buf msg;
+    int j;
+    int k;
+    int flag;
+    char str[MAX_TEXT];
     for(int i = 1; i < argc; i++){
-        int j = 0;
-        int k = 0;
-        int flag = 0;
         FILE *file = fopen(argv[i], "r");
         if(!file){
             perror("File is not open.\n");
             exit(1);
         }
         while(getline(&line, &len, file) != -1){
-            msg_buf msg;
+            j = 0;
+            k = 0;
+            flag = 0;
             sscanf(line, "prior=%d", &prior);
             msg.mtype = prior;
             while(flag != 2){
@@ -53,11 +56,13 @@ int main(int argc, char *argv[]){
                 }
                 j++;
             }
+            j++;
             while(k < MAX_TEXT && line[j] != '\"'){
                 str[k] = line[j];
                 k++;
                 j++;
             }
+            str[k] = 0;
             strcpy(msg.mtext, str);
             msgsnd(server_msgid, &msg, sizeof(msg), 0); //отправка в очередь
             printf("Message is sent.\n");
