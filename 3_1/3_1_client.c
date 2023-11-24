@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
         }
         fclose(file);
     }
-
+    sleep(1);
     msg_buf msg_2;
     while(count){
         client_msgid = msgget(client_key, 0);

@@ -25,13 +25,12 @@ int main(){
     printf("Server is running.\n");
     while(1){
         msg_buf msg;
-        if(msgrcv(server_msgid, &msg, sizeof(msg), 0, IPC_NOWAIT) < 0){ //возвращает колво байт. тип 0 - любое сбщ принято
+        if(msgrcv(server_msgid, &msg, sizeof(msg), -MAX_PRIOR, IPC_NOWAIT) < 0){ //возвращает колво байт. тип 0 - любое сбщ принято
             continue;
         }
         printf("Server received message.\n");
         if(msg.mtype == 1){ //проверка типа на завершение программы
             printf("Received exit message. Server closing.\n");
-            msgsnd(client_msgid, &msg, sizeof(msg), IPC_NOWAIT);
             break;
         }
         process_message(msg, client_msgid);
@@ -66,7 +65,6 @@ void process_message(msg_buf msg, int msgid){
             }
         }
     }
-    msg.mtype = 2;
     strcpy(msg.mtext, temp);
     msgsnd(msgid, &msg, sizeof(msg), IPC_NOWAIT);//отправка в очередь
 }
