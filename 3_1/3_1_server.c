@@ -16,10 +16,10 @@ int create_queue(key_t key);
 void process_message(msg_buf msg, int msgid);
 
 int main(){
-    key_t server_key = ftok("server_key", 'r');
+    key_t server_key = ftok("server_key", 'q');
     int server_msgid = create_queue(server_key);
 
-    key_t client_key = ftok("client_key", 'r');
+    key_t client_key = ftok("client_key", 'q');
     int client_msgid = create_queue(client_key);
 
     printf("Server is running.\n");
@@ -56,11 +56,11 @@ void process_message(msg_buf msg, int msgid){
     strcpy(temp, msg.mtext);
     char prev = '\0';
     char cur;
-    for (int i = 0; i < length; i++) {
+    for(int i = 0; i < length; i++){
         cur = temp[i];
-        if(prev == cur && (cur == ' ' || cur == '\t' || cur == '\n' || cur == '!' || cur == '.' || cur == ',' || cur == '?')) {
-            for(int j = i; j < length; j++) {
-                temp[j] = temp[j + 1];
+        if(prev == cur && (cur == ' ' || cur == '\t')){
+            for(int j = i; j < length; j++){
+                temp[j] = temp[j+1];
             }
             i--;
         }

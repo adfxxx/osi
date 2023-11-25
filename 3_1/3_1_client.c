@@ -15,14 +15,14 @@ typedef struct{
 }msg_buf;
 
 int main(int argc, char *argv[]){
-    key_t server_key = ftok("server_key", 'r');
+    key_t server_key = ftok("server_key", 'q');
     int server_msgid = msgget(server_key, 0);
     if(server_msgid < 0){
         perror("Server does not exist.\n");
         exit(1);
     }
 
-    key_t client_key = ftok("client_key", 'r');
+    key_t client_key = ftok("client_key", 'q');
     int client_msgid = msgget(client_key, 0);
     if(client_msgid < 0){
         perror("Client does not exist.\n");
