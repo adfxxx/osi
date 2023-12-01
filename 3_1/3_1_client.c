@@ -19,14 +19,14 @@ int main(int argc, char *argv[]){
     int server_msgid = msgget(server_key, 0);
     if(server_msgid < 0){
         perror("Server does not exist.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     key_t client_key = ftok("client_key", 'q');
     int client_msgid = msgget(client_key, 0);
     if(client_msgid < 0){
         perror("Client does not exist.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     
     char *line = NULL;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
         FILE *file = fopen(argv[i], "r");
         if(!file){
             perror("File is not open.\n");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         while(getline(&line, &len, file) != -1){
             j = 0;

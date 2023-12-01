@@ -3,6 +3,7 @@
 #include <sys/msg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define MAX_TEXT 100
 #define MAX_PRIOR 5
@@ -21,6 +22,11 @@ int main(){
 
     key_t client_key = ftok("client_key", 'q');
     int client_msgid = create_queue(client_key);
+
+    if(server_msgid < 0 || client_msgid < 0){
+        perror("Error: queues have not created.\n");
+        exit(EXIT_FAILURE);
+    }
 
     printf("Server is running.\n");
     while(1){
